@@ -25,7 +25,7 @@ def setup():
     par.M = 10
     par.T = 10
     
-    # Gauss Hermite weights and poins
+    # Gauss Hermite weights and points
     par.num_shocks = 5
     x,w = gauss_hermite(par.num_shocks)
     par.eps = np.exp(par.sigma*np.sqrt(2)*x)
@@ -36,46 +36,44 @@ def setup():
     par.M_ini = 1.5
     
     # Grid
-    par.num_M = 100
-    par.grid_M = nonlinspace(1.0e-6,par.M,par.num_M,1.1) # same as np.linspace just with unequal spacing
-
-    #4. End of period assets - used for EGM-solution
-    par.grid_a = nonlinspace(0 + 1e-8,par.M,par.num_M,1.1)
+    par.num_a = 100
+    #4. End of period assets
+    par.grid_a = nonlinspace(0 + 1e-8,par.M,par.num_a,1.1)
 
     # Dimension of value function space
-    par.dim = [par.num_M,par.T]
+    par.dim = [par.num_a,par.T]
     
     return par
 
 def EGM_loop (sol,t,par):
-
-    interp = interpolate.interp1d(sol.M[:,t+1],sol.C[:,t+1], bounds_error=False, fill_value = "extrapolate") 
-    for i_a,a in enumerate(par.grid_a):
-
-        # Futute m and c
+    interp = interpolate.interp1d(sol.M[:,t+1],sol.C[:,t+1], bounds_error=False, fill_value = "extrapolate")  # Interpolation function
+    for i_a,a in enumerate(par.grid_a): # Loop over end-of-period assets
+        # Future m and c
         m_next = par.R * a + par.eps
         c_next = interp(m_next)
         # Future marginal utility
         EU_next = np.sum(par.eps_w*marg_util(c_next,par))
 
-        # Currect C and m
+        # Currect C and m. We use i_a+1 because we add zero consumption to acound for the borrowing constraint
         sol.C[i_a+1,t]= inv_marg_util(par.R * par.beta * EU_next, par)
         sol.M[i_a+1,t]= sol.C[i_a+1,t] + a
 
     return sol
 
-
 def EGM_vectorized (sol,t,par):
 
-    interp = interpolate.interp1d(sol.M[:,t+1],sol.C[:,t+1], bounds_error=False, fill_value = "extrapolate")
+    interp = interpolate.interp1d(sol.M[:,t+1],sol.C[:,t+1], bounds_error=False, fill_value = "extrapolate") # Interpolation function
 
-    # weights = np.tile(par.eps_w, par.num_M)
-    nodes = np.tile(par.eps, par.num_M)
-    a = np.repeat(par.grid_a, par.num_shocks)
+    nodes = np.tile(par.eps, par.num_a) # Repeat eps for each a
+    a = np.repeat(par.grid_a, par.num_shocks) # Repeat a for each eps
+    #Future m and c
     m_next  = par.R * a + nodes
     c_next = interp(m_next)
+    #Compute marginal utility of consumption of next period
     marg_u_next = marg_util(c_next,par)
-    marg_u_next =  np.reshape(marg_u_next, (par.num_M, par.num_shocks))
+    #Reshape to matrix to fit with eps_w
+    marg_u_next =  np.reshape(marg_u_next, (par.num_a, par.num_shocks))
+    #Compute expected marginal utility
     EU_next = np.sum(par.eps_w * marg_u_next, axis = 1)
     # Currect C and m
     sol.C[1:,t]= inv_marg_util(par.R * par.beta * EU_next, par)
@@ -86,21 +84,20 @@ def EGM_vectorized (sol,t,par):
 def solve_EGM(par, vector = False):
      # initialize solution class
     class sol: pass
-    shape = [par.num_M+1, par.T]
+    shape = [par.num_a+1, par.T]
     sol.C = np.nan + np.zeros(shape)
     sol.M = np.nan + np.zeros(shape)
     # Last period, consume everything
-    sol.M[:,par.T-1] = nonlinspace(0,par.M,par.num_M+1,1.1)
+    sol.M[:,par.T-1] = nonlinspace(0,par.M,par.num_a+1,1.1)
     sol.C[:,par.T-1]= sol.M[:,par.T-1].copy()
 
     # Loop over periods
     for t in range(par.T-2, -1, -1):  #from period T-2, until period 0, backwards
-        # sol = EGM_loop(sol, t, par) 
         if vector == True:
             sol = EGM_vectorized(sol, t, par)
         else:
             sol = EGM_loop(sol, t, par)
-        # add zero consumption
+        # add zero consumption to account for borrowing constraint
         sol.M[0,t] = 0
         sol.C[0,t] = 0
     return sol
