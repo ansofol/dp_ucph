@@ -15,9 +15,11 @@ def solve_VFI(par):
         it = it+1
         V_next = V_now.copy()
         for w in range(par.W+1):
-            #Fill in
-            
-            
+            c = np.arange(w+1)
+
+            V_guess = np.sqrt(c)+par.beta*V_next[w-c] #(w+1) vector of possible values next period
+            V_now[w] = np.amax(V_guess) #Find the maximum value
+            Cstar[w] = np.argmax(V_guess)
             
             
         delta = np.amax(np.abs(V_now - V_next))

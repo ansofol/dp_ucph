@@ -23,8 +23,10 @@ def solve_consumption_grid_search(par):
         V_next = sol.V.copy()
         for iw,w in enumerate(grid_W):  # enumerate automaticcaly unpack w
                                         # Fill in  
-                                        # Hint: For each w create a consumption grid, c, using grid_C.
-                                        #       Use c to calculate V_guess using interpolation
+            c = grid_C*w                # Hint: For each w create a consumption grid, c, using grid_C.
+            V_guess = np.sqrt(c) + par.beta*np.interp(w-c, grid_W, V_next)        #       Use c to calculate V_guess using interpolation
+            sol.V[iw] = np.amax(V_guess) #Find the maximum value
+            sol.C[iw] = c[np.argmax(V_guess)]
                                         #       In order to interpolate use:  np.interp
                                         #       Proceed as in Exercise_2.py
       
