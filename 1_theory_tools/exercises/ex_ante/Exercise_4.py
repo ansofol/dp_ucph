@@ -29,6 +29,9 @@ def solve_consumption_uncertainty(par):
                 # Hint: Loop through shocks
                 #       Interpolate value function for each shock
                 #       Add weighted contribution to expectation
+                for ie, eps in enumerate(par.eps):
+                    w_next = w_c + eps
+                    EV_next += par.pi[ie]*np.interp(w_next, sol.grid_W[:,t+1], sol.V[:,t+1])
                 
             V_guess = np.sqrt(c)+par.beta*EV_next
             index = np.argmax(V_guess)

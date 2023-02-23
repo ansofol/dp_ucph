@@ -29,6 +29,8 @@ def solve_consumption_deaton(par):
                 for s in range(par.num_shocks):
                     # fill in
                     # Hint: Same procedure as in Exercise_4
+                    w_next = par.R*w_c + par.eps[s]
+                    EV_next += par.eps_w[s]*np.interp(w_next, sol.grid_W[:,t+1], sol.V[:,t+1])
                    
 
                    
