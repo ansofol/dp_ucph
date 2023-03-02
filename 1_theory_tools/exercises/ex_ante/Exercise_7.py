@@ -54,15 +54,20 @@ def solve_deaton_infty(par):
         
         for iw,w in enumerate(par.grid_W):
             #fill in
+            c = grid_C*w
+            w_c = w - c
+            EV_next = 0
+            for i_e, eps in enumerate(par.eps):
+                w_next = par.R*w_c + eps
+                EV_next += par.eps_w[i_e]*np.interp(w_next, par.grid_W, V0)
+                #EV_next += par.eps_w[i_e]*interp(w_next)
+            
+            V_guess = util(c,par)+par.beta*EV_next
+            index = np.argmax(V_guess)
+            sol.C[iw] = c[index]
+            sol.V[iw] = np.amax(V_guess)
             
             
-            
-            
-            
-            
-            
-            
-        
         sol.it += 1
         sol.delta = max(abs(sol.V - V0)) 
     
