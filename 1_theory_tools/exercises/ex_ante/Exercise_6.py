@@ -29,7 +29,7 @@ def solve_consumption_deaton(par):
                 for s in range(par.num_shocks):
                     # fill in
                     # Hint: Same procedure as in Exercise_4
-                   
+                   pass
 
                    
                     
