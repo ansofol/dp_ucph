@@ -31,15 +31,15 @@ def estimate(model,solver,data,theta0=[0,0],twostep=0,est_type=0):
     # print(theta0)
     t0 = time.time()
     if est_type == 0: # BHHH
-        res = optimize.minimize(ll,theta0,args = (model, solver, data, pnames), method = 'trust-ncg',jac = grad, hess = hes, tol=1e-8)
+        res = optimize.minimize(ll,theta0,args = (model, solver, data, pnames), method = 'bfgs',jac = grad, hess = hes, tol=1e-8)
         model=updatepar(model,pnames,res.x)
     
     if est_type == 1: # Turn the hessian off
-        res = optimize.minimize(ll,theta0,args = (model, solver, data, pnames),jac = grad, tol=1e-8)
+        res = optimize.minimize(ll,theta0,args = (model, solver, data, pnames),method='bfgs', jac = grad, tol=1e-8)
         model=updatepar(model,pnames,res.x)
 
     if est_type == 2: # Turn both the hessian and the gradiant off
-        res = optimize.minimize(ll,theta0,args = (model, solver, data, pnames), tol=1e-8)
+        res = optimize.minimize(ll,theta0,args = (model, solver, data, pnames), method='bfgs', tol=1e-8)
         model=updatepar(model,pnames,res.x)
     
     # Estimate RC, c and p
