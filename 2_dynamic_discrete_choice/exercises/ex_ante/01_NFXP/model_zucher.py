@@ -186,14 +186,21 @@ class zurcher():
         # pp: Pr{x} (Equilibrium distribution of mileage)
         # pp_K: Pr{x,i=Keep}
         # pp_R: Pr{x,i=Replace}
-        tmp =self.P1[:,1:self.n] * pk[1:self.n]
-        pl = np.hstack(((1-np.sum(tmp,1,keepdims=True)), tmp)) 
+        tmp =self.P1[:,1:self.n] * pk[1:self.n] # qH (choice probabilities * transitions)
+        pl = np.hstack(((1-np.sum(tmp,1,keepdims=True)), tmp)) # make sum to one - put remaining mass in first 
+                                                               # gridpoint because that is where we transition
+                                                               # if we replace.
 
+        # pl now describes how the system moves after both choice transition and exogenous transition
         pp = self.ergodic(pl)
 
-        pp_K = pp.copy()    
-        pp_K[0] = self.p[0]*pp[0]*pk[0]
-        pp_R = (1-pk)*pp
+        # pp describes unconditional distribution of mileage.
+        pp_K = pp.copy()                    # Being in all grid point except the first is a result of keeping.
+        pp_K[0] = self.p[0]*pp[0]*pk[0]     # So we can copy the unconditional distribution and just adjust the
+                                            # first gridpoint to: 
+                                            # prob if transition * prob of being there * prob of keeping
+                                            
+        pp_R = (1-pk)*pp # replacement is 1-pk, so here we can just take the product
 
         return pp, pp_K, pp_R
 
