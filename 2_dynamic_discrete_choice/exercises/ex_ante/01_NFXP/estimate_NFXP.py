@@ -52,6 +52,7 @@ def estimate(model,solver,data,theta0=[0,0],twostep=0):
 def ll(theta, model, solver,data, pnames, out=1, no_guess = True): # out=1 solve optimization
     """ Compute log-likelihood function """
     global ev # Use global variable to store value function to use as starting value for next iteration
+    # this is just set equal to 0??
     
     #Unpack and convert to numpy array
     x = np.array(data.x - 1) # x is the index of the observed state: We subtract 1 because python starts counting at 0
