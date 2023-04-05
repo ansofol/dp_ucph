@@ -83,13 +83,20 @@ class zurcher():
         
         # Euler constant
         eulerc = np.euler_gamma
-        
+
+        Ea_keep = eulerc - np.log(pk)
+        Ea_replace = eulerc - np.log(1-pk)
+
+        u_keep = -self.cost 
+        u_replace = -self.RC - self.cost[0]
+
+        sum = pk*(u_keep + Ea_keep) + (1-pk)*(u_replace + Ea_replace)
+
         # Compute Vsigma
         #Fill in
         #Hint:  Use the small psi function from slides
         #       Make sure to get E[\epsilon(a)|a,x] correct
-
-        #self.Vsigma = 
+        self.Vsigma = self.Finv@sum
 
     def lambdaa(self):
         '''Evaluate lambda function (mapping from Vsigma to updated CCP)'''
@@ -99,7 +106,12 @@ class zurcher():
         #Hint:  Use the big lambda function from slides
         #       This is just the choice probability expression as used in NFXP
         
-        #pk=
+        # Value of options:
+        value_keep = -self.cost + self.beta * self.P1 @ self.Vsigma # nx1 matrix
+        value_replace = -self.RC - self.cost[0] + self.beta * self.P2 @ self.Vsigma   # 1x1
+
+        # Compute choice probability of keep
+        pk = 1/(1+np.exp(value_replace-value_keep))   
         
         return  pk
 

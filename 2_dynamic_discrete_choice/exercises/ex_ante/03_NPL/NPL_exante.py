@@ -17,7 +17,7 @@ def setup_data(data):
 
 def estimate(model, data, Kmax = 100):
     '''Estimate model using Nested Psuedo Likelihood (NPL)'''
-    #Load previous choice probability as global variable
+    # Load previous choice probability as global variable
     global pk    
 
     # Find transition probabilities, p (non-parametrical 1-step estimator)
