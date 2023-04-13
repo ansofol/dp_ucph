@@ -52,10 +52,21 @@ def EGM_loop (sol,t,par):
         # Fill in
         # Hint: Use the EGM step (see Bertel's slides)
         # 1. Find m_next
+        m_next = par.R*a + par.eps
+
         # 2. Find c_next using interpolation of next period solution
+        c_next = interp(m_next)
+
         # 3. Find expected marginal utility of next period consumption
+        EU_next = 0
+        for w, i in enumerate(par.eps_w):
+            EU_next += w*marg_util(c_next[i])
+
         # 4. Find optimal consumption using inverted Euler
+        c_now = inv_marg_util(par.beta*par.R*EU_next)
+
         # 5. Find endogenous cash on hand (m)
+        
         
         # Index 0 is used for the corner solution, so start at index 1
         sol.C[i_a+1,t]= c_now
