@@ -59,14 +59,14 @@ def EGM_loop (sol,t,par):
 
         # 3. Find expected marginal utility of next period consumption
         EU_next = 0
-        for w, i in enumerate(par.eps_w):
-            EU_next += w*marg_util(c_next[i])
+        for i, w in enumerate(par.eps_w):
+            EU_next += w*marg_util(c_next[i], par)
 
         # 4. Find optimal consumption using inverted Euler
-        c_now = inv_marg_util(par.beta*par.R*EU_next)
+        c_now = inv_marg_util(par.beta*par.R*EU_next, par)
 
         # 5. Find endogenous cash on hand (m)
-        
+
         
         # Index 0 is used for the corner solution, so start at index 1
         sol.C[i_a+1,t]= c_now
@@ -81,6 +81,17 @@ def EGM_vectorized (sol,t,par):
     # Fill in
     # Hint: Look at the exercise_2.EGM_loop function and follow the EGM step procedure
     #       Look at the exercise_1.euler_error_func function and follow the vectorization syntax
+
+    m_next = (par.R*par.grid_a)[:,np.newaxis] + par.eps[np.newaxis,:]
+
+    c_next = interp(m_next)
+
+    EU_next = np.sum(par.eps_w[np.newaxis,:] * marg_util(c_next,par),axis=1)
+
+    c_now = inv_marg_util(par.beta*par.R*EU_next, par)
+
+    sol.C[1:,t]= c_now
+    sol.M[1:,t]= c_now + par.grid_a
     
     return sol
 
